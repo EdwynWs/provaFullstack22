@@ -1,146 +1,85 @@
 'use client'
+import ApiClient from "@/utils/apiClient";
+import Loading from "@/app/components/loading";
 import Link from "next/link";
-import { useContext } from "react";
-import UserContext from "./context/userContext";
+import { useEffect, useState } from "react";
 
-export default function AdminLayout({children}) {
+const COLUNAS = [
+    { chave: "a_fazer", titulo: "A fazer", cor: "primary", icone: "fa-list" },
+    { chave: "em_andamento", titulo: "Em andamento", cor: "warning", icone: "fa-spinner" },
+    { chave: "em_revisao", titulo: "Em revisão", cor: "info", icone: "fa-search" },
+    { chave: "concluido", titulo: "Concluído", cor: "success", icone: "fa-check" }
+];
 
-    const {usuario} = useContext(UserContext);
+export default function DashboardPage() {
+    const [resumo, setResumo] = useState({
+        a_fazer: 0, em_andamento: 0, em_revisao: 0, concluido: 0
+    });
+    const [loading, setLoading] = useState(true);
+    const [erro, setErro] = useState(false);
+
+    async function carregarResumo() {
+        try {
+            // O backend disponibiliza esta rota própria para as contagens.
+            let response = await ApiClient.get("tarefas/resumo");
+            if (response) {
+                setResumo(response);
+                setErro(false);
+            } else {
+                setErro(true);
+            }
+        } catch (erro) {
+            console.error(erro);
+            setErro(true);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        carregarResumo();
+    }, []);
+
+    let total = COLUNAS.reduce((soma, item) => soma + Number(resumo[item.chave] || 0), 0);
 
     return (
         <div>
-            <div id="wrapper">
-                
-                <ul className="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
-
-                    <a className="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
-                        <div className="sidebar-brand-icon rotate-n-15">
-                            <i className="fas fa-laugh-wink"></i>
-                        </div>
-                        <div className="sidebar-brand-text mx-3">PFS <sup>2</sup></div>
-                    </a>
-
-                    <hr className="sidebar-divider my-0" />
-
-                    <li className="nav-item active">
-                        <Link className="nav-link" href="/tarefas">
-                            <i className="fas fa-home"></i>
-                            <span>Início</span></Link>
-                    </li>
-
-                    <hr className="sidebar-divider" />
-
-                    <div className="sidebar-heading">
-                        Menu
-                    </div>
-                    <li className="nav-item">
-                        <Link className="nav-link" href="/tarefas/kanban">
-                            <i className="fas fa-user"></i>
-                            <span>Kanban</span></Link>
-                    </li>
-
-                    <li className="nav-item">
-                        <Link className="nav-link" href="/tarefas/usuarios">
-                            <i className="fas fa-home"></i>
-                            <span>Usuarios</span></Link>
-                    </li>
-
-                </ul>
-
-                <div id="content-wrapper" className="d-flex flex-column">
-
-                    <div id="content">
-
-                        <nav className="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
-
-                            <button id="sidebarToggleTop" className="btn btn-link d-md-none rounded-circle mr-3">
-                                <i className="fa fa-bars"></i>
-                            </button>
-
-                            <ul className="navbar-nav ml-auto">
-
-                                <div className="topbar-divider d-none d-sm-block"></div>
-
-                                
-                                <li className="nav-item dropdown no-arrow">
-                                    <a className="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        <span className="mr-2 d-none d-lg-inline text-gray-600 small"> {usuario ? usuario.nome: ""}</span>
-                                        <img className="img-profile rounded-circle"
-                                            src="/img/user.jpg" />
-                                    </a>
-                                    
-                                    <div className="dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                                        aria-labelledby="userDropdown">
-                                        <div className="dropdown-divider"></div>
-                                        <a className="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
-                                            <i className="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                                            Logout
-                                        </a>
+            <div className="d-sm-flex align-items-center justify-content-between mb-4">
+                <h1 className="h3 mb-0 text-gray-800">Dashboard</h1>
+                <Link href="/tarefas/quadro" className="btn btn-primary"><i className="fas fa-columns"></i> Abrir Quadro</Link>
+            </div>
+            {loading ? <Loading /> : erro ?
+                <div className="alert alert-danger" role="alert">
+                    Não foi possível carregar o resumo.
+                    <button className="btn btn-sm btn-outline-danger ml-3" onClick={carregarResumo}>Tentar novamente</button>
+                </div>
+            :
+                <div>
+                    <div className="row">
+                        {COLUNAS.map((item) => (
+                            <div key={item.chave} className="col-xl-3 col-md-6 mb-4">
+                                <div className={"card border-left-" + item.cor + " shadow h-100 py-2"}>
+                                    <div className="card-body">
+                                        <div className="row no-gutters align-items-center">
+                                            <div className="col mr-2">
+                                                <div className={"text-xs font-weight-bold text-" + item.cor + " text-uppercase mb-1"}>{item.titulo}</div>
+                                                <div className="h5 mb-0 font-weight-bold text-gray-800">{resumo[item.chave] || 0}</div>
+                                            </div>
+                                            <div className="col-auto"><i className={"fas " + item.icone + " fa-2x text-gray-300"}></i></div>
+                                        </div>
                                     </div>
-                                </li>
-
-                            </ul>
-
-                        </nav>
-                        <div>
-                            <h1>Bem vindo ao Organizador 2000</h1>
-                        </div>
-
-                        
-                        <div className="container-fluid">
-
-                        <div style={{minHeight: 800}}>
-                            {children}
-                        </div>
-
-                        </div>
-                        
-
-                    </div>
-                    
-
-                    
-                    <footer className="sticky-footer bg-white">
-                        <div className="container my-auto">
-                            <div className="copyright text-center my-auto">
-                                <span>Copyright &copy; Your Website 2026</span>
+                                </div>
                             </div>
-                        </div>
-                    </footer>
-                    
-
-                </div>
-                
-
-            </div>
-
-
-
-            <a className="scroll-to-top rounded" href="#page-top">
-                <i className="fas fa-angle-up"></i>
-            </a>
-
-
-            <div className="modal fade" id="logoutModal" tabIndex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-                aria-hidden="true">
-                <div className="modal-dialog" role="document">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h5 className="modal-title" id="exampleModalLabel">Pronto para sair?</h5>
-                            <button className="close" type="button" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">×</span>
-                            </button>
-                        </div>
-                        <div className="modal-body">Clique no botão "logout" abaixo para sair do sistema</div>
-                        <div className="modal-footer">
-                            <button className="btn btn-secondary" type="button" data-dismiss="modal">Cancelar</button>
-                            <button className="btn btn-primary" >Logout</button>
+                        ))}
+                    </div>
+                    <div className="card shadow mb-4">
+                        <div className="card-body">
+                            <h2 className="h5 text-gray-800">Total de tarefas ativas: {total}</h2>
+                            <p className="mb-0">Os valores vêm de <code>GET /tarefas/resumo</code>, e não de números fixos.</p>
                         </div>
                     </div>
                 </div>
-            </div>
+            }
         </div>
-    )
-
+    );
 }

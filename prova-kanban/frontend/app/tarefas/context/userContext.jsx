@@ -1,44 +1,36 @@
 'use client'
-
+import { createContext, useEffect, useState } from "react";
 import ApiClient from "@/utils/apiClient";
 import Loading from "../../components/loading";
 
-const { createContext, useState, useEffect } = require("react")
-
 const UserContext = createContext();
 
-export const UserProvider = ({children}) => {
-
+export const UserProvider = ({ children }) => {
     const [usuario, setUsuario] = useState(null);
     const [loading, setLoading] = useState(true);
 
     async function carregarUsuario() {
-        let response = await ApiClient.get("login/usuario");
-        if(response) {
-            setUsuario(response);
+        try {
+            // Backend da prova: GET /auth/cookie (no projeto do professor era login/usuario).
+            let response = await ApiClient.get("auth/cookie");
+            setUsuario(response || null);
+        } catch (erro) {
+            console.error("Erro ao carregar usuário:", erro);
+            setUsuario(null);
+        } finally {
+            setLoading(false);
         }
-
-        setLoading(false);
     }
 
     useEffect(() => {
         carregarUsuario();
-    }, [])
+    }, []);
 
     return (
-        <UserContext.Provider value={{usuario, setUsuario}}>
-            {
-                loading ?
-                <html>
-                    <body>
-                        <Loading></Loading>
-                    </body>
-                </html>
-                :
-                children
-            }
+        <UserContext.Provider value={{ usuario, setUsuario }}>
+            {loading ? <Loading /> : children}
         </UserContext.Provider>
-    )
-}
+    );
+};
 
 export default UserContext;
