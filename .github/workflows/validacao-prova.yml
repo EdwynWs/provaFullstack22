@@ -1,0 +1,29 @@
+name: Validacao da prova Kanban
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-frontend:
+    name: Compilar frontend Next.js
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: prova-kanban/frontend
+    steps:
+      - name: Baixar projeto
+        uses: actions/checkout@v4
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: prova-kanban/frontend/package-lock.json
+      - name: Instalar dependencias
+        run: npm ci
+      - name: Compilar projeto
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
