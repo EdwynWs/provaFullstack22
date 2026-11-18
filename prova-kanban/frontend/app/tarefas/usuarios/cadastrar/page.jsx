@@ -1,14 +1,6 @@
-import FormImovel from "@/app/components/formImovel";
-
-
-export default function  CadastrarPage() {
-
-
-    return (
-        <div>
-            <h1>Cadastrar</h1>
-
-            <FormImovel></FormImovel>
-        </div>
-    )
+// A API entregue na prova tem GET /usuarios, mas não tem POST /usuarios.
+// Evitamos oferecer um formulário de cadastro inexistente.
+import { redirect } from "next/navigation";
+export default function CadastroUsuariosIndisponivel() {
+    redirect("/tarefas/usuarios");
 }

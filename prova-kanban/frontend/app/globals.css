@@ -1,29 +1,43 @@
-
 i {
-  margin-right: 5px;
+    margin-right: 5px;
 }
 
-.corAzul {
-  color: blue;
+.corAzul { color: blue; }
+
+/* Quadro de quatro colunas, com rolagem horizontal em telas menores. */
+.quadro-scroll {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 12px;
 }
 
-.grid-imovel {
+.quadro-kanban {
     display: grid;
-    grid-template-columns: 300px 300px 300px;
-    gap: 20px;
-    justify-content: center;
+    grid-template-columns: repeat(4, minmax(250px, 1fr));
+    gap: 16px;
+    min-width: 1050px;
+    align-items: start;
 }
 
-@media (max-width: 920px) {
-  .grid-imovel {
-      grid-template-columns: 300px 300px;
-
-  }
+.kanban-coluna {
+    background-color: #f8f9fc;
+    border: 1px solid #e3e6f0;
+    border-top-width: 4px;
+    border-radius: 8px;
+    min-height: 330px;
+    padding: 15px;
 }
 
-@media (max-width: 600px) {
-  .grid-imovel {
-      grid-template-columns: 300px;
+.border-top-primary { border-top-color: #4e73df; }
+.border-top-warning { border-top-color: #f6c23e; }
+.border-top-info { border-top-color: #36b9cc; }
+.border-top-success { border-top-color: #1cc88a; }
 
-  }
+.kanban-card {
+    cursor: grab;
+    border: 1px solid #e3e6f0;
 }
+
+.kanban-card:active { cursor: grabbing; }
+.kanban-card .card-body { overflow-wrap: anywhere; }
+.kanban-vazio { margin-top: 40px; }
